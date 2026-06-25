@@ -5,11 +5,11 @@
         <h2 class="card-title text-center mb-4">Вход</h2>
         
         <div class="mb-3">
-          <input v-model="email" type="text" class="form-control" placeholder="Email">
+          <input v-model="email" autocomplete="off" type="text" class="form-control" placeholder="Email">
         </div>
         
         <div class="mb-3">
-          <input v-model="password" type="password" class="form-control" placeholder="Пароль">
+          <input v-model="password" autocomplete="off" type="password" class="form-control" placeholder="Пароль">
         </div>
         
         <button @click="login" class="btn btn-primary w-100 mb-3">Войти</button>

@@ -5,15 +5,15 @@
         <h2 class="card-title text-center mb-4">Регистрация</h2>
         
         <div class="mb-3">
-          <input v-model="username" type="text" class="form-control" placeholder="Имя пользователя">
+          <input v-model="username" autocomplete="off" type="text" class="form-control" placeholder="Имя пользователя">
         </div>
         
         <div class="mb-3">
-          <input v-model="email" type="text" class="form-control" placeholder="Email">
+          <input v-model="email" autocomplete="=off" type="text" class="form-control" placeholder="Email">
         </div>
         
         <div class="mb-3">
-          <input v-model="password" type="password" class="form-control" placeholder="Пароль">
+          <input v-model="password" autocomplete="off" type="password" class="form-control" placeholder="Пароль">
         </div>
         
         <button @click="register" class="btn btn-primary w-100 mb-3">Зарегистрироваться</button>
