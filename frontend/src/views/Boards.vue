@@ -18,12 +18,15 @@
       <div class="col-md-4 mb-3" v-for="board in boards" :key="board.id">
         <div class="card h-100 shadow-sm">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <div v-if="editBoardID === board.id" class="d-flex gap-2">
-              <input v-model="editBoardName" type="text" class="form-control form-control-sm" placeholder="Новое название" @keyup.enter="saveBoardName(board.id)">
-              <button class="btn btn-success btn-sm" @click="saveBoardName(board.id)">Сохранить</button>
-              <button class="btn btn-secondary btn-sm" @click="editBoardId = null">Отмена</button>
+            <div class="d-flex align-items-center gap-2">
+              <div v-if="editBoardID === board.id" class="d-flex gap-2">
+                <input v-model="editBoardName" type="text" class="form-control form-control-sm" placeholder="Новое название" @keyup.enter="saveBoardName(board.id)">
+                <button class="btn btn-success btn-sm" @click="saveBoardName(board.id)">Сохранить</button>
+                <button class="btn btn-secondary btn-sm" @click="editBoardId = null">Отмена</button>
+              </div>
+              <h5 v-else class="card-title mb-0">{{ board.boardname }}</h5>
+              <span class="badge bg-secondary">{{ tasks[board.id]?.length || 0 }}</span>
             </div>
-            <h5 v-else class="card-title mb-0">{{ board.boardname }}</h5>
             
             <div class="dropdown">
               <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,6 +44,10 @@
           <div class="card-body">
             <p class="addTask" @click="showTaskInput[board.id] = true">+ Добавить задачу</p>
 
+            <div v-if="!tasks[board.id]?.length" class="text-muted">
+              Нет задач. Добавьте первую!
+            </div>
+
             <div v-if="showTaskInput[board.id]">
               <input @keyup.enter="createTask(board.id)" v-model="description[board.id]" type="text" class="form-control mt-2" placeholder="Название задачи">
             </div>
@@ -57,12 +64,17 @@
                   </svg>
                 </div>
 
-                <div v-if="editTaskID === task.id" class="d-flex gap-2">
-                  <input v-model="editTaskName" type="text" class="form-control form-control-sm" placeholder="Новое название" @keyup.enter="saveTaskName(task.id)">
-                  <button class="btn btn-success btn-sm" @click="saveTaskName(task.id)">Сохранить</button>
-                  <button class="btn btn-secondary btn-sm" @click="editTaskId = null">Отмена</button>
+                <div>
+                  <div v-if="editTaskID === task.id" class="d-flex gap-2">
+                    <input v-model="editTaskName" type="text" class="form-control form-control-sm" placeholder="Новое название" @keyup.enter="saveTaskName(task.id)">
+                    <button class="btn btn-success btn-sm" @click="saveTaskName(task.id)">Сохранить</button>
+                    <button class="btn btn-secondary btn-sm" @click="editTaskId = null">Отмена</button>
+                  </div>
+                  <span v-else class="task-text" :class="{ done: task.status === 'done' }">{{ task.description }}</span>
+                  <div class="task-date text-muted small">
+                    {{ formatDate(task.createdAt) }}
+                  </div>
                 </div>
-                <span v-else class="task-text" :class="{ done: task.status === 'done' }">{{ task.description }}</span>
               </div>
 
               <div class="dropdown">
@@ -73,7 +85,7 @@
                 </button>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item text-danger" href="#" @click.prevent="deleteTask(task.id)">Удалить задачу</a></li>
-                  <li><a class="dropdown-item text" href="#" @click.prevent="startEditTask(task)">Изменить название</a></li>
+                  <li><a class="dropdown-item text" href="#" @click.prevent="startEditTask(task)">Изменить задачу</a></li>
                 </ul>
               </div>
             </div>
@@ -102,10 +114,24 @@ const loading=ref(true)
 const editTaskID=ref(null)
 const editTaskName=ref('')
 
+const formatDate=(dateString)=>{
+    if(!dateString)return ''
+    
+    const date=new Date(dateString)
+    date.setHours(date.getHours()+5) //времеенно решение для моего часового пояса
+    
+    return date.toLocaleDateString('ru-RU',{
+        day:'2-digit',
+        month:'2-digit',
+        year:'numeric',
+        hour:'2-digit',
+        minute:'2-digit'
+    })
+}
+
 const startEditTask=(task)=>{
     editTaskID.value=task.id
     editTaskName.value=task.description
-
 }
 
 const saveTaskName=async(taskID)=>{

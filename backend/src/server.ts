@@ -39,6 +39,7 @@ db.run(`create table if not exists tasks(
     description text,
     status text default 'todo',
     boardID integer,
+    createdAt DATETIME DEFAULT (datetime('now', 'localtime')),
     foreign key (boardID) references boards(id) on delete cascade)
 `)
 
@@ -217,12 +218,24 @@ app.delete('/api/boards/:boardID',auth,(req:Request,res:Response)=>{
 
     if(!boardID)return res.status(400).json({error:'invalid board ID'})
 
-    db.run(`delete from boards where id=? and userID=?`,[boardID,userID],
-        function(err){
-            if(err)return res.status(500).json({error:'failed to delete board'})
-            res.json({message:'доска удалена'})
+    db.get(`select * from boards where id=?`,[boardID],(err,board:Board)=>{
+        if(err){
+            console.log('ошибка поиска доски: ',err.message)
+            return res.status(500).json({error:'ошибка сервера'})
         }
-    )
+
+            if(!board)return res.status(404).json({message:'доска не найдена'})
+
+            if(board.userID!==userID)return res.status(403).json({error:'нет прав на удаление этой доски'})
+
+            db.run(`delete from boards where id=? and userID=?`,[boardID,userID],
+        function(err){
+                    if(err)return res.status(500).json({error:'failed to delete board'})
+                    res.json({message:'доска удалена'})
+                }
+            )
+        
+    })
 })
 
 //update запросы
