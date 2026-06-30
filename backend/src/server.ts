@@ -149,7 +149,22 @@ app.post('/api/task',auth,(req:Request,res:Response)=>{
     if(!description||!boardID)return res.status(400).json({error:'description or boardID required'})
 
     db.get(`select * from boards where id=? and userID=?`,[boardID,userID],(err,board)=>{
+
+        if(err){
+            console.log(err?.message)
+            return res.status(500).json({message:'ошибка проверки на дубли'})
+        }
+
         if(!board)return res.status(403).json({error:'board not found'})
+
+        db.get(`select * from tasks where description=? and boardID=?`,[description,boardID],(err,task)=>{
+        
+            if(err){
+                console.log(err.message)
+                return res.status(400).json({message:'ошибка проверки на дубли'})
+            }
+
+            if(task)return res.status(400).json({error:'задача с таким именем уже существует'})
 
             db.run(`insert into tasks (description,boardID) values (?,?)`,
                 [description,boardID],
@@ -158,6 +173,7 @@ app.post('/api/task',auth,(req:Request,res:Response)=>{
                     res.json({id:this.lastID,description,status:'todo',boardID})
                 }
             )
+        })
     })
 })
 
@@ -168,7 +184,14 @@ app.post('/api/boards',auth,(req:Request,res:Response)=>{
 
     if(!boardname)return res.status(400).json({message:'board has to have a name'})
 
-    db.run(`insert into boards (boardname,content,userID) values(?,?,?)`,[boardname,content,userID],
+    db.get(`select * from boards where boardname=? and userID=?`,[boardname,userID],(err,exictingBoard)=>{
+        if(err){
+            console.log(err.message)
+            return res.status(500).json({message:'ошибка проверки на дубли'})
+        }
+        if(exictingBoard)return res.status(400).json({error:'доска с таким именем уже существует'})
+
+        db.run(`insert into boards (boardname,content,userID) values(?,?,?)`,[boardname,content,userID],
         function(err){
             if(err){
                 console.log(err.message)
@@ -178,6 +201,7 @@ app.post('/api/boards',auth,(req:Request,res:Response)=>{
             return res.json({id:this.lastID,boardname,content,userID})
         }
     )
+    })
 })
 
 //get запросы

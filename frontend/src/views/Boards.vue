@@ -49,7 +49,7 @@
             </div>
 
             <div v-if="showTaskInput[board.id]">
-              <input @keyup.enter="createTask(board.id)" v-model="description[board.id]" type="text" class="form-control mt-2" placeholder="Название задачи">
+              <input @blur="showTaskInput[board.id] = false" @keyup.enter="createTask(board.id)" v-model="description[board.id]" type="text" class="form-control mt-2" placeholder="Название задачи">
             </div>
 
             <div v-for="task in tasks[board.id] || []" :key="task.id" class="mt-2 d-flex align-items-center justify-content-between">
@@ -175,6 +175,17 @@ const fetchboard=async()=>{
     loading.value=false
 }
 
+const getTasks=async(boardID)=>{
+    try{
+        const token=localStorage.getItem('token')
+        const res=await axios.get(`http://localhost:5178/api/tasks/${boardID}`,
+            {headers:{Authorization:`Bearer ${token}`}}
+        )
+        tasks.value[boardID]=res.data
+        console.log('задачи получены')
+    }catch(error){console.log(error)}
+}
+
 const createTask=async(boardID)=>{
     try{
         const desc=description.value[boardID]
@@ -191,18 +202,10 @@ const createTask=async(boardID)=>{
             {headers:{Authorization:`Bearer ${token}`}}
         )
         tasks.value[boardID]=tasksRes.data
-    }catch(error){console.log(error)}
-}
-
-const getTasks=async(boardID)=>{
-    try{
-        const token=localStorage.getItem('token')
-        const res=await axios.get(`http://localhost:5178/api/tasks/${boardID}`,
-            {headers:{Authorization:`Bearer ${token}`}}
-        )
-        tasks.value[boardID]=res.data
-        console.log('задачи получены')
-    }catch(error){console.log(error)}
+    }catch(error){
+        console.log(error)
+        alert(error.response?.data?.error||'задача с таким именем уже создан')
+    }
 }
 
 const createBoard=async()=>{
@@ -223,6 +226,7 @@ const createBoard=async()=>{
     }
     catch(error){
         console.log(error)
+        alert(error.response?.data?.error||'доска с таким именем уже создана')
     }
 
     await fetchboard()
@@ -270,6 +274,8 @@ const changeNameBoard=(boardID)=>{
 
 onMounted(async()=>{
     await fetchboard()
+    console.log('Текущие доски:', boards.value)
+console.log('Текущие задачи:', tasks.value)
 })
 </script>
 
@@ -305,5 +311,14 @@ onMounted(async()=>{
     text-decoration:line-through;
     color:#6c757d;
     opacity:0.7;
+}
+.task-text{
+    /* display:block;
+    max-width:180px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis; */
+    word-wrap:break-word;
+    word-break:break-all;
 }
 </style>
