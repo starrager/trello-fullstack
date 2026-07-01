@@ -22,7 +22,7 @@
               <div v-if="editBoardID === board.id" class="d-flex gap-2">
                 <input v-model="editBoardName" type="text" class="form-control form-control-sm" placeholder="Новое название" @keyup.enter="saveBoardName(board.id)">
                 <button class="btn btn-success btn-sm" @click="saveBoardName(board.id)">Сохранить</button>
-                <button class="btn btn-secondary btn-sm" @click="editBoardId = null">Отмена</button>
+                <button class="btn btn-secondary btn-sm" @click="editBoardID=null">Отмена</button>
               </div>
               <h5 v-else class="card-title mb-0">{{ board.boardname }}</h5>
               <span class="badge bg-secondary">{{ tasks[board.id]?.length || 0 }}</span>
