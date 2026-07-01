@@ -100,6 +100,8 @@
 import {ref,onMounted} from 'vue'
 import axios from 'axios'
 
+const API_URL=import.meta.env.VITE_API_URL||'http://localhost:5178'
+
 const showTaskInput=ref({})
 const boardname=ref('')
 const newBoardName=ref('')
@@ -140,7 +142,7 @@ const saveTaskName=async(taskID)=>{
     console.log('отправляю: ',payload)
 
     try{
-        await axios.put(`http://localhost:5178/api/tasks/${taskID}/newTaskName`,payload,{headers:{Authorization:`Bearer ${token}`}})
+        await axios.put(`${API_URL}/api/tasks/${taskID}/newTaskName`,payload,{headers:{Authorization:`Bearer ${token}`}})
         editTaskName.value=''
         editTaskID.value=null
         await fetchboard()
@@ -158,7 +160,7 @@ const saveBoardName=async(boardID)=>{
     const payload = { newBoardName: editBoardName.value }
     console.log('Отправляю:', payload)
     try{
-        await axios.put(`http://localhost:5178/api/boards/${boardID}`,{newBoardName:editBoardName.value},{headers:{Authorization:`Bearer ${token}`}})
+        await axios.put(`${API_URL}/api/boards/${boardID}`,{newBoardName:editBoardName.value},{headers:{Authorization:`Bearer ${token}`}})
         editBoardName.value=''
         editBoardID.value=null
         await fetchboard()
@@ -167,7 +169,7 @@ const saveBoardName=async(boardID)=>{
 
 const fetchboard=async()=>{
     loading.value=true
-    const res=await axios.get('http://localhost:5178/api/boards',
+    const res=await axios.get(`${API_URL}/api/boards`,
         {headers:{Authorization:`Bearer ${localStorage.getItem('token')}`}}
     )
     boards.value=res.data
@@ -178,7 +180,7 @@ const fetchboard=async()=>{
 const getTasks=async(boardID)=>{
     try{
         const token=localStorage.getItem('token')
-        const res=await axios.get(`http://localhost:5178/api/tasks/${boardID}`,
+        const res=await axios.get(`${API_URL}/api/tasks/${boardID}`,
             {headers:{Authorization:`Bearer ${token}`}}
         )
         tasks.value[boardID]=res.data
@@ -190,7 +192,7 @@ const createTask=async(boardID)=>{
     try{
         const desc=description.value[boardID]
         const token=localStorage.getItem(`token`)
-        const res=await axios.post('http://localhost:5178/api/task',
+        const res=await axios.post(`${API_URL}/api/task`,
             {description:desc,boardID:boardID},
             {headers:{Authorization:`Bearer ${token}`}}
         )
@@ -198,7 +200,7 @@ const createTask=async(boardID)=>{
         description.value[boardID]=''
         showTaskInput.value[boardID]=false
 
-        const tasksRes=await axios.get(`http://localhost:5178/api/tasks/${boardID}`,
+        const tasksRes=await axios.get(`${API_URL}/api/tasks/${boardID}`,
             {headers:{Authorization:`Bearer ${token}`}}
         )
         tasks.value[boardID]=tasksRes.data
@@ -214,7 +216,7 @@ const createBoard=async()=>{
             alert('не указано имя доски')
             return
         }
-            const res=await axios.post('http://localhost:5178/api/boards',
+            const res=await axios.post(`${API_URL}/api/boards`,
                 {boardname:boardname.value},
                 {headers:{Authorization:`Bearer ${localStorage.getItem('token')}`}}
             )
@@ -236,7 +238,7 @@ const updateTaskStatus=async(boardID,task)=>{
     const token=localStorage.getItem('token')
     try{
         task.status=task.status==='todo'?'done':'todo'
-        await axios.put(`http://localhost:5178/api/tasks/${task.id}`,
+        await axios.put(`${API_URL}/api/tasks/${task.id}`,
             {boardID:boardID,status:task.status},
             {headers:{Authorization:`Bearer ${token}`}}
         )
@@ -247,7 +249,7 @@ const removeBoard=async(boardID)=>{
     console.log('удаляю доску из бд')
     const token=localStorage.getItem('token')
     try{
-        const res=await axios.delete(`http://localhost:5178/api/boards/${boardID}`,
+        const res=await axios.delete(`${API_URL}/api/boards/${boardID}`,
             {headers:{Authorization:`Bearer ${token}`}}
         )
         console.log('ОТвет сервера',res.data)
@@ -262,7 +264,7 @@ const changeNameTask=async(boardID)=>{
     const newBoardName=newBoardName.value
     const token=localStorage.getItem('token')
     try{
-        const res=await axios.put(`http://localhost:5178/api/boards/${boardID}`,{boardID,newBoardName},
+        const res=await axios.put(`${API_URL}/api/boards/${boardID}`,{boardID,newBoardName},
             {headers:{Authorization:`Bearer ${token}`}}
         )
     }catch(error){console.log(error)}

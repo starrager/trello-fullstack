@@ -25,13 +25,15 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import axios from 'axios'
 
+const API_URL=import.meta.env.VITE_API_URL||'http://localhost:5178'
+
 const router=useRouter()
 const email=ref('')
 const password=ref('')
 
 const login=async()=>{
     try{
-        const res=await axios.post('http://localhost:5178/api/login',
+        const res=await axios.post(`${API_URL}/api/login`,
             {email:email.value,password:password.value})
         localStorage.setItem('token',res.data.token)
         localStorage.setItem('user',JSON.stringify(res.data.user))
